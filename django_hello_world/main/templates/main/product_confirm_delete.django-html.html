@@ -1,0 +1,21 @@
+{% extends 'main/base.django-html.html' %}
+
+{% block title %}Supprimer le produit{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h3>Supprimer le produit</h3>
+                <p>Êtes-vous sûr de vouloir supprimer le produit "{{ object.name }}" ?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                    <a href="{% url 'main:product-list' %}" class="btn btn-secondary">Annuler</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

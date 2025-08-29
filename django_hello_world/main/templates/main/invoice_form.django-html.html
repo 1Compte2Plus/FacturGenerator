@@ -1,0 +1,159 @@
+{% extends 'main/base.django-html.html' %}
+{% load form_tags %}
+
+{% block title %}Nouvelle Facture{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2>Créer une nouvelle facture</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    {{ formset.management_form }}
+                    <h4>Produits</h4>
+                    <table class="table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Quantité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in formset %}
+                            <tr class="formset-row">
+                                <td>
+                                    {{ form.id }}
+                                    {{ form.product|addclass:"form-select" }}
+                                </td>
+                                <td>
+                                    {{ form.quantity|addclass:"form-control" }}
+                                </td>
+                                <td>
+                                    {% if not forloop.first %}
+                                    {{ form.DELETE|addclass:"form-check-input" }}
+                                    <label class="form-check-label">Supprimer</label>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    
+                    
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Enregistrer la facture</button>
+                        <a href="{% url 'main:invoice-list' %}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('JS chargé');
+    const tableBody = document.querySelector('#products-table tbody');
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    console.log('Le totalForms est de : ',totalForms.value)
+    
+    function isRowFilled(row) {
+        const product = row.querySelector('select');
+        const quantity = row.querySelector('input[type="number"], input[type="text"]');
+        return product && product.value && quantity && quantity.value;
+    }
+    
+    // Ajoute le bouton "Supprimer" à toutes les lignes existantes au chargement
+    function addDeleteButtons() {
+        const rows = tableBody.querySelectorAll('.formset-row');
+        rows.forEach((row) => {
+            const deleteCell = row.querySelector('td:last-child');
+            deleteCell.innerHTML = `
+            <button type="button" class="btn btn-danger btn-sm remove-row">Supprimer</button>
+            `;
+        });
+    }
+    addDeleteButtons();
+    
+    function addNewRowIfNeeded() {
+        const rows = tableBody.querySelectorAll('.formset-row');
+        console.log('Le rows est de : ',rows.length)
+        const lastRow = rows[rows.length - 1];
+        if (isRowFilled(lastRow)) {
+            const newRow = lastRow.cloneNode(true);
+            const formIdx = rows.length;
+            console.log('Le formIdx est de : ',formIdx)
+            
+            // Met à jour tous les attributs name, id et for
+            Array.from(newRow.querySelectorAll('input, select, label')).forEach(el => {
+                if (el.name) {
+                    el.name = el.name.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
+                }
+                if (el.id) {
+                    el.id = el.id.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
+                }
+                if (el.htmlFor) {
+                    el.htmlFor = el.htmlFor.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
+                }
+                // Reset values
+                if (el.type === 'checkbox') el.checked = false;
+                else if (el.name && el.name.includes('quantity')) el.value = 0;
+                else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                else if (el.value !== undefined) el.value = '';
+            });
+            
+            // Ajoute le bouton supprimer
+            const deleteCell = newRow.querySelector('td:last-child');
+            if (deleteCell) {
+                deleteCell.innerHTML = `
+                <button type="button" class="btn btn-danger btn-sm remove-row">Supprimer</button>
+                `;
+            }
+            
+            tableBody.appendChild(newRow);
+            totalForms.value = formIdx + 1; // <-- C'est ici que tu augmentes TOTAL_FORMS
+            console.log('Le formIdx est de : ',formIdx)
+        }
+        console.log('Le totalForms est de : ',totalForms.value)
+    }
+
+    // Supprime ou reset la ligne au clic sur le bouton "Supprimer"
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-row')) {
+            const rows = tableBody.querySelectorAll('.formset-row');
+            const row = e.target.closest('tr');
+            if (rows.length === 1) {
+                // Reset les champs si c'est la seule ligne
+                Array.from(row.querySelectorAll('input, select')).forEach(el => {
+                    if (el.type === 'checkbox') el.checked = false;
+                    else el.value = '';
+                });
+            } else {
+                row.remove();
+                // Met à jour le TOTAL_FORMS
+                const updatedRows = tableBody.querySelectorAll('.formset-row');
+                totalForms.value = updatedRows.length;
+                
+                console.log('Le totalForms est de : ',totalForms.value)
+            }
+        }
+    });
+
+    tableBody.addEventListener('input', function(e) {
+        console.log('Champ modifié:', e.target.name, 'Valeur:', e.target.value);
+        addNewRowIfNeeded();
+    });
+});
+</script>
+{% endblock %}
+
+

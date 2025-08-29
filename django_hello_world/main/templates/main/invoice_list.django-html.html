@@ -1,0 +1,49 @@
+{% extends 'main/base.django-html.html' %}
+
+{% block title %}Liste des Factures{% endblock %}
+
+{% block content %}
+<h1>Liste des Factures</h1>
+<a href="{% url 'main:invoice-add' %}" class="btn btn-primary">Créer une facture</a>
+
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Numéro</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invoice in invoices %}
+        <tr>
+            <td>{{ invoice.id }}</td>
+            <td>{{ invoice.created_at|date:"d/m/Y" }}</td>
+            <td>{{ invoice.total }} €</td>
+            <td>
+                <a href="{% url 'main:invoice-detail' invoice.pk %}" class="btn btn-sm btn-info">Voir</a>
+                <a href="{% url 'main:invoice-delete' invoice.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+        </li>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

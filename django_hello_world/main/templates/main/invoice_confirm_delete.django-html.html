@@ -1,0 +1,13 @@
+{% extends 'main/base.django-html.html' %}
+
+{% block title %}Supprimer la facture{% endblock %}
+
+{% block content %}
+<h2>Supprimer la facture</h2>
+<p>Voulez-vous vraiment supprimer cette facture ?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+    <a href="{% url 'main:invoice-list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

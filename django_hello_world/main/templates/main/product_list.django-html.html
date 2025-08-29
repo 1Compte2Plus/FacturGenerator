@@ -1,0 +1,48 @@
+{% extends 'main/base.django-html.html' %}
+
+{% block content %}
+<h1>Liste des Produits</h1>
+<a href="{% url 'main:product-add' %}" class="btn btn-primary">Ajouter un produit</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Date de péremption</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.price }} €</td>
+            <td>{{ product.expiration_date }}</td>
+            <td>
+                <a href="{% url 'main:product-edit' product.pk %}" class="btn btn-sm btn-warning">Éditer</a>
+                <a href="{% url 'main:product-delete' product.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+        </li>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
