@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.urls import reverse_lazy
 from django.forms import inlineformset_factory, formset_factory
 from .models import Product, Invoice, InvoiceItem
-from .forms import ProductForm, InvoiceItemFormSet  # Assurez-vous d'importer le formulaire
+from .forms import ProductForm, InvoiceItemFormSet  
 
 InvoiceItemFormSet = inlineformset_factory(
     Invoice,
@@ -14,7 +14,7 @@ InvoiceItemFormSet = inlineformset_factory(
     can_delete=True
 )
 
-ProductFormSet = formset_factory(ProductForm, extra=1)  # Affiche 3 formulaires vides
+ProductFormSet = formset_factory(ProductForm, extra=1) 
 
 def home(request):
     context = {
@@ -33,19 +33,17 @@ class ProductCreateView(CreateView):
     model = Product
     template_name = 'main/product_form.django-html.html'
     fields = ['name', 'price', 'expiration_date']
-    success_url = reverse_lazy('main:product-list')  # Ajoutez le namespace 'main:'
+    success_url = reverse_lazy('main:product-list') 
 
 class ProductUpdateView(UpdateView):
     model = Product
     template_name = 'main/product_form.django-html.html'
     fields = ['name', 'price', 'expiration_date']
-    success_url = reverse_lazy('main:product-list')  # Ajoutez le namespace 'main:'
-
+    success_url = reverse_lazy('main:product-list')  
 class ProductDeleteView(DeleteView):
     model = Product
     template_name = 'main/product_confirm_delete.django-html.html'
-    success_url = reverse_lazy('main:product-list')  # Ajoutez le namespace 'main:'
-
+    success_url = reverse_lazy('main:product-list') 
 class InvoiceListView(ListView):
     model = Invoice
     template_name = 'main/invoice_list.django-html.html'
@@ -104,7 +102,7 @@ class InvoiceUpdateView(UpdateView):
         formset.instance = self.object
         if formset.is_valid():
             formset.save()
-            self.object.update_total()  # <-- Appelé après la sauvegarde des items
+            self.object.update_total()  
         return redirect(self.success_url)
 
 class InvoiceDeleteView(DeleteView):

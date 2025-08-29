@@ -38,6 +38,7 @@
                                     {% if not forloop.first %}
                                     {{ form.DELETE|addclass:"form-check-input" }}
                                     <label class="form-check-label">Supprimer</label>
+                                    
                                     {% endif %}
                                 </td>
                             </tr>
@@ -61,7 +62,6 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JS chargé');
     const tableBody = document.querySelector('#products-table tbody');
     const totalForms = document.getElementById('id_items-TOTAL_FORMS');
     console.log('Le totalForms est de : ',totalForms.value)
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return product && product.value && quantity && quantity.value;
     }
     
-    // Ajoute le bouton "Supprimer" à toutes les lignes existantes au chargement
+   
     function addDeleteButtons() {
         const rows = tableBody.querySelectorAll('.formset-row');
         rows.forEach((row) => {
@@ -84,62 +84,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     addDeleteButtons();
     
+
     function addNewRowIfNeeded() {
         const rows = tableBody.querySelectorAll('.formset-row');
-        console.log('Le rows est de : ',rows.length)
         const lastRow = rows[rows.length - 1];
         if (isRowFilled(lastRow)) {
             const newRow = lastRow.cloneNode(true);
             const formIdx = rows.length;
-            console.log('Le formIdx est de : ',formIdx)
-            
-            // Met à jour tous les attributs name, id et for
+
             Array.from(newRow.querySelectorAll('input, select, label')).forEach(el => {
-                if (el.name) {
-                    el.name = el.name.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
-                }
-                if (el.id) {
-                    el.id = el.id.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
-                }
-                if (el.htmlFor) {
-                    el.htmlFor = el.htmlFor.replace(/invoiceitem_set-(\d+)-/, `invoiceitem_set-${formIdx}-`);
-                }
-                // Reset values
+                if (el.name) el.name = el.name.replace(/items-(\d+)-/, `items-${formIdx}-`);
+                if (el.id) el.id = el.id.replace(/items-(\d+)-/, `items-${formIdx}-`);
+                if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/items-(\d+)-/, `items-${formIdx}-`);
                 if (el.type === 'checkbox') el.checked = false;
                 else if (el.name && el.name.includes('quantity')) el.value = 0;
                 else if (el.tagName === 'SELECT') el.selectedIndex = 0;
                 else if (el.value !== undefined) el.value = '';
             });
-            
-            // Ajoute le bouton supprimer
+
             const deleteCell = newRow.querySelector('td:last-child');
             if (deleteCell) {
                 deleteCell.innerHTML = `
-                <button type="button" class="btn btn-danger btn-sm remove-row">Supprimer</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-row">Supprimer</button>
                 `;
             }
-            
+
             tableBody.appendChild(newRow);
-            totalForms.value = formIdx + 1; // <-- C'est ici que tu augmentes TOTAL_FORMS
-            console.log('Le formIdx est de : ',formIdx)
+            totalForms.value = formIdx + 1;
         }
-        console.log('Le totalForms est de : ',totalForms.value)
     }
 
-    // Supprime ou reset la ligne au clic sur le bouton "Supprimer"
+   
     tableBody.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-row')) {
             const rows = tableBody.querySelectorAll('.formset-row');
             const row = e.target.closest('tr');
             if (rows.length === 1) {
-                // Reset les champs si c'est la seule ligne
+
                 Array.from(row.querySelectorAll('input, select')).forEach(el => {
                     if (el.type === 'checkbox') el.checked = false;
                     else el.value = '';
                 });
             } else {
                 row.remove();
-                // Met à jour le TOTAL_FORMS
                 const updatedRows = tableBody.querySelectorAll('.formset-row');
                 totalForms.value = updatedRows.length;
                 
@@ -151,6 +138,13 @@ document.addEventListener('DOMContentLoaded', function() {
     tableBody.addEventListener('input', function(e) {
         console.log('Champ modifié:', e.target.name, 'Valeur:', e.target.value);
         addNewRowIfNeeded();
+
+        const rows = tableBody.querySelectorAll('.formset-row');
+        let filledCount = 0;
+        rows.forEach(row => {
+            if (isRowFilled(row)) filledCount++;
+        });
+        totalForms.value = filledCount;
     });
 });
 </script>

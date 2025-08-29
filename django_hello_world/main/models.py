@@ -23,3 +23,11 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+
+    @property
+    def price(self):
+        return self.product.price
+
+    @property
+    def subtotal(self):
+        return self.product.price * self.quantity
