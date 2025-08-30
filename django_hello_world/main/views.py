@@ -29,6 +29,9 @@ class ProductListView(ListView):
     context_object_name = 'products'
     paginate_by = 10
 
+    def get_queryset(self):
+        return Product.objects.order_by('-id') 
+
 class ProductCreateView(CreateView):
     model = Product
     template_name = 'main/product_form.django-html.html'
@@ -49,6 +52,9 @@ class InvoiceListView(ListView):
     template_name = 'main/invoice_list.django-html.html'
     context_object_name = 'invoices'
     paginate_by = 10    
+
+    def get_queryset(self):
+        return Invoice.objects.order_by('-id')  
 
 class InvoiceDetailView(DetailView):
     model = Invoice
